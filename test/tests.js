@@ -36,7 +36,6 @@ test("Normalizing with input parameters passed into Normalizer object", function
     var normalizer = new Normalizer(10, 1, 1, 0),
         sampleNormalizedNumber = normalizer.normalize(7);
 
-    console.log(sampleNormalizedNumber);
     ok(sampleNormalizedNumber === 0.333, "Passed!");
 });
 
@@ -168,4 +167,29 @@ test("Passing in array of numbers should return null", function() {
         normalizedClasses = normalizer.oneOfNEncode(sampleClasses);
 
     ok(normalizedClasses === null, "Passed!");
+});
+
+module("Equilateral Encoding");
+
+test("Passing in array of class names should return an object with encoded classes", function() {
+    var normalizer = new Normalizer(),
+        sampleClasses = ["Red", "Green", "Blue"],
+        normalizedClasses = normalizer.equilateralEncode(sampleClasses);
+
+    ok(typeof normalizedClasses === 'object', "Passed!");
+
+    ok(normalizedClasses.hasOwnProperty("Red") === true, "Passed!");
+    ok(normalizedClasses.hasOwnProperty("Green") === true, "Passed!");
+    ok(normalizedClasses.hasOwnProperty("Blue") === true, "Passed!");
+});
+
+module("Euclidean Distance");
+
+test("Passing in expected values as an array and an actual values as as an array will return the distance", function() {
+    var normalizer = new Normalizer(1, 0, 1, 0),
+        expectedValue = [1, 0, 0, 0, 0, 0, 0],
+        actualValue = [0, 0, 0, 1, 0, 1, 0],
+        euclideanDistance = normalizer.getEuclideanDistance(expectedValue, actualValue);
+
+    ok(euclideanDistance > 0, "Passed!");
 });

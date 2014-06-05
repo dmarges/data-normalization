@@ -86,5 +86,34 @@ Normalizer.prototype = {
             encodedClasses[classesToNormalize[i]][i] = 1;
         }
         return encodedClasses;
+    },
+
+    equilateralEncode: function(classesToNormalize) {
+        var encodedClasses = {};
+
+        for(var i = 0; i < classesToNormalize.length; i++) {
+            encodedClasses[classesToNormalize[i]] = new Array(classesToNormalize.length);
+
+
+            for(var j = 0; j < encodedClasses[classesToNormalize[i]].length; j++) {
+                encodedClasses[classesToNormalize[i]][j] = 0;
+            }
+
+            encodedClasses[classesToNormalize[i]][i] = 1;
+        }
+        return encodedClasses;
+    },
+
+    getEuclideanDistance: function(expectedValue, actualValue) {
+        var results = 0;
+
+        for(var i = 0; i < expectedValue.length; i++) {
+            var difference = expectedValue[i] - actualValue[i];
+            results += difference * difference;
+        }
+
+        var squaredResults = Math.sqrt(results);
+
+        return this.normalize(squaredResults);
     }
 };
