@@ -1,8 +1,9 @@
-function Normalizer(dataHigh, dataLow, normalizedHigh, normalizedLow) {
+function Normalizer(dataHigh, dataLow, normalizedHigh, normalizedLow, classEncodingValue) {
     this.dataHigh = dataHigh || 10;
     this.dataLow = dataLow || 0;
     this.normalizedHigh = normalizedHigh || 1;
     this.normalizedLow = normalizedLow || -1;
+    this.classEncodingValue = classEncodingValue || 0;
 }
 
 Normalizer.prototype = {
@@ -49,6 +50,41 @@ Normalizer.prototype = {
             calculatedDenormalizedNumber = ((dataRangeDifference * numberToDenormalize) - productOfNormalizedHighAndDataLow + productOfDataHighAndNormalizedLow) / normalizedRangeDifference;
 
         return Math.round(calculatedDenormalizedNumber);
-    }
+    },
 
+    oneOfNEncode: function(classesToNormalize) {
+
+        if(classesToNormalize === undefined) {
+            return null;
+        }
+
+        if(typeof classesToNormalize !== 'object') {
+            return null;
+        }
+
+        if(classesToNormalize === null) {
+            return null;
+        }
+
+        for(var i = 0; i < classesToNormalize.length; i++) {
+
+            if(typeof classesToNormalize[i] !== 'string') {
+                return null;
+            }
+        }
+
+        var encodedClasses = {};
+
+        for(var i = 0; i < classesToNormalize.length; i++) {
+            encodedClasses[classesToNormalize[i]] = new Array(classesToNormalize.length);
+
+
+            for(var j = 0; j < encodedClasses[classesToNormalize[i]].length; j++) {
+                encodedClasses[classesToNormalize[i]][j] = 0;
+            }
+
+            encodedClasses[classesToNormalize[i]][i] = 1;
+        }
+        return encodedClasses;
+    }
 };
