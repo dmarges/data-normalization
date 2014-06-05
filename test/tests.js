@@ -6,11 +6,12 @@ test( "Normalization object created successfully", function() {
 });
 
 test("Setting instance variables", function() {
-    var normalizer = new Normalizer(10, 0, 1, -1);
+    var normalizer = new Normalizer(10, 0, 1, -1, -1);
     ok(normalizer.dataHigh === 10, "Passed!");
     ok(normalizer.dataLow === 0, "Passed!");
     ok(normalizer.normalizedHigh === 1, "Passed!");
     ok(normalizer.normalizedLow === -1, "Passed!");
+    ok(normalizer.classEncodingValue === -1, "Passed!");
 });
 
 test("Setting instance variables with no input parameters", function() {
@@ -19,6 +20,7 @@ test("Setting instance variables with no input parameters", function() {
     ok(normalizer.dataLow === 0, "Passed!");
     ok(normalizer.normalizedHigh === 1, "Passed!");
     ok(normalizer.normalizedLow === -1, "Passed!");
+    ok(normalizer.classEncodingValue === 0, "Passed!");
 });
 
 module("Normalizing data");
@@ -110,4 +112,60 @@ test("Trying to denormalize number with null passed in", function() {
         sampleDenormalizedNumber = normalizer.denormalize({number: 7});
 
     ok(sampleDenormalizedNumber === null, "Passed!");
+});
+
+module("One-of-N Encoding");
+
+test("Passing in an array of class names should return an array of numeric values", function() {
+    var normalizer = new Normalizer(),
+        sampleClasses = ['Red', 'Green', 'Blue'],
+        normalizedClasses = normalizer.oneOfNEncode(sampleClasses);
+
+    ok(typeof normalizedClasses === 'object', "Passed!");
+
+    ok(normalizedClasses.hasOwnProperty('Red') === true, "Passed!");
+    ok(normalizedClasses.hasOwnProperty('Green') === true, "Passed!");
+    ok(normalizedClasses.hasOwnProperty('Blue') === true, "Passed!");
+
+    ok(normalizedClasses[sampleClasses[0]][0] === 1, "Passed!");
+    ok(normalizedClasses[sampleClasses[0]][1] === 0, "Passed!");
+    ok(normalizedClasses[sampleClasses[0]][2] === 0, "Passed!");
+
+    ok(normalizedClasses[sampleClasses[1]][0] === 0, "Passed!");
+    ok(normalizedClasses[sampleClasses[1]][1] === 1, "Passed!");
+    ok(normalizedClasses[sampleClasses[1]][2] === 0, "Passed!");
+
+    ok(normalizedClasses[sampleClasses[2]][0] === 0, "Passed!");
+    ok(normalizedClasses[sampleClasses[2]][1] === 0, "Passed!");
+    ok(normalizedClasses[sampleClasses[2]][2] === 1, "Passed!");
+});
+
+test("Passing in nothing should return null", function() {
+    var normalizer = new Normalizer(),
+        normalizedClasses = normalizer.oneOfNEncode();
+
+    ok(normalizedClasses === null, "Passed!");
+});
+
+test("Passing in anything else other than an array (object type in JS) should return null", function() {
+    var normalizer = new Normalizer(),
+        normalizedClasses = normalizer.oneOfNEncode('hello');
+
+    ok(normalizedClasses === null, "Passed!");
+
+    normalizedClasses = normalizer.oneOfNEncode(10);
+
+    ok(normalizedClasses === null, "Passed!");
+
+    normalizedClasses = normalizer.oneOfNEncode(null);
+
+    ok(normalizedClasses === null, "Passed!");
+});
+
+test("Passing in array of numbers should return null", function() {
+    var normalizer = new Normalizer(),
+        sampleClasses = [0, 0, 0];
+        normalizedClasses = normalizer.oneOfNEncode(sampleClasses);
+
+    ok(normalizedClasses === null, "Passed!");
 });
