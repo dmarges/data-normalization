@@ -154,27 +154,27 @@ module("Validation Functions", {
 });
 
     test("Validating number input catches number input as valid", function() {
-        ok(normalizer.validateForNumeric(7), "Passed!");
+        ok(normalizer.validateForNumeric(7), "validateForNumeric did not properly recognize valid input");
     });
 
     test("Validating number input catches non numeric values as invalid", function() {
-        ok(!normalizer.validateForNumeric("7"), "Passed!");
-        ok(!normalizer.validateForNumeric({number: 7}), "Passed!");
-        ok(!normalizer.validateForNumeric([7]), "Passed!");
-        ok(!normalizer.validateForNumeric(), "Passed!");
-        ok(!normalizer.validateForNumeric(null), "Passed!");
+        ok(!normalizer.validateForNumeric("7"), "validateForNumeric did not recognize string input as invalid");
+        ok(!normalizer.validateForNumeric({number: 7}), "validateForNumeric did not recognize object input as invalid");
+        ok(!normalizer.validateForNumeric([7]), "validateForNumeric did not recognize array input as invalid");
+        ok(!normalizer.validateForNumeric(), "validateForNumeric did not recognize undefined input as invalid");
+        ok(!normalizer.validateForNumeric(null), "validateForNumeric did not recognize null input as invalid");
     });
 
     test("Validating array input catches array input as valid", function() {
-        ok(normalizer.validateForArray([42], 'number'), "Passed!");
+        ok(normalizer.validateForArray([42], 'number'), "validateForArray did not properly recognize valid input");
     });
 
     test("Validating array input catches non array input as invalid", function() {
-        ok(!normalizer.validateForArray("42", 'number'), "Passed!");
-        ok(!normalizer.validateForArray(42, 'number'), "Passed!");
-        ok(!normalizer.validateForArray({number: 42}, 'number'), "Passed!");
-        ok(!normalizer.validateForArray(), "Passed!");
-        ok(!normalizer.validateForArray(null, 'number'), "Passed!");
+        ok(!normalizer.validateForArray("42", 'number'), "validateForNumeric did not recognize string input as invalid");
+        ok(!normalizer.validateForArray(42, 'number'), "validateForNumeric did not recognize number input as invalid");
+        ok(!normalizer.validateForArray({number: 42}, 'number'), "validateForNumeric did not recognize object input as invalid");
+        ok(!normalizer.validateForArray(), "validateForNumeric did not recognize undefined input as invalid");
+        ok(!normalizer.validateForArray(null, 'number'), "validateForNumeric did not recognize null input as invalid");
     });
 
 module();
