@@ -36,7 +36,6 @@ test("Normalizing with input parameters passed into Normalizer object", function
     var normalizer = new Normalizer(10, 1, 1, 0),
         sampleNormalizedNumber = normalizer.normalize(7);
 
-    console.log(sampleNormalizedNumber);
     ok(sampleNormalizedNumber === 0.333, "Passed!");
 });
 
@@ -168,4 +167,154 @@ test("Passing in array of numbers should return null", function() {
         normalizedClasses = normalizer.oneOfNEncode(sampleClasses);
 
     ok(normalizedClasses === null, "Passed!");
+});
+
+module("Equilateral Encoding");
+
+test("Passing in array of class names should return an object with encoded classes", function() {
+    var normalizer = new Normalizer(),
+        sampleClasses = ["Red", "Green", "Blue"],
+        normalizedClasses = normalizer.equilateralEncode(sampleClasses, sampleClasses.length);
+
+    ok(typeof normalizedClasses === 'object', "Passed!");
+
+    ok(normalizedClasses.hasOwnProperty("Red") === true, "Passed!");
+    ok(normalizedClasses.hasOwnProperty("Green") === true, "Passed!");
+    ok(normalizedClasses.hasOwnProperty("Blue") === true, "Passed!");
+});
+
+module("Euclidean Distance");
+
+test("Passing in expected values as an array and an actual values as as an array will return the distance", function() {
+    var normalizer = new Normalizer(1, 0, 1, 0),
+        expectedValue = [1, 0, 0, 0, 0, 0, 0],
+        actualValue = [0, 0, 0, 1, 0, 1, 0],
+        euclideanDistance = normalizer.getEuclideanDistance(expectedValue, actualValue);
+
+    ok(typeof euclideanDistance === 'number', "Passed!");
+});
+
+test("Not passing in any arguments should return null", function() {
+    var normalizer = new Normalizer(),
+        euclideanDistance = normalizer.getEuclideanDistance();
+
+    ok(euclideanDistance === null, "Passed!");
+});
+
+test("Passing wrong number of arguments should return null", function() {
+    var normalizer = new Normalizer(),
+        actualValue = [0, 0, 0, 0, 0, 0, 0],
+        euclideanDistance = normalizer.getEuclideanDistance(actualValue);
+
+    ok(euclideanDistance === null, "Passed!");
+});
+
+test("Passing in non array values to first argument should return null", function() {
+    var normalizer = new Normalizer(),
+        expectedValue = {},
+        actualValue = [0, 0, 0, 0, 0, 0, 0],
+        euclideanDistance = normalizer.getEuclideanDistance(expectedValue, actualValue);
+
+    ok(euclideanDistance === null, "Passed!");
+
+    expectedValue = "test";
+    euclideanDistance = normalizer.getEuclideanDistance(expectedValue, actualValue);
+
+    ok(euclideanDistance === null, "Passed!");
+
+    expectedValue = 42;
+    euclideanDistance = normalizer.getEuclideanDistance(expectedValue, actualValue);
+
+    ok(euclideanDistance === null, "Passed!");
+
+    expectedValue = null;
+    euclideanDistance = normalizer.getEuclideanDistance(expectedValue, actualValue);
+
+    ok(euclideanDistance === null, "Passed!");
+});
+
+test("Passing in non array values to second argument should return null", function() {
+    var normalizer = new Normalizer(),
+        expectedValue = [0, 0, 0, 0, 0, 0, 0],
+        actualValue = {},
+        euclideanDistance = normalizer.getEuclideanDistance(expectedValue, actualValue);
+
+    ok(euclideanDistance === null, "Passed!");
+
+    actualValue = "test";
+    euclideanDistance = normalizer.getEuclideanDistance(expectedValue, actualValue);
+
+    ok(euclideanDistance === null, "Passed!");
+
+    actualValue = 42;
+    euclideanDistance = normalizer.getEuclideanDistance(expectedValue, actualValue);
+
+    ok(euclideanDistance === null, "Passed!");
+
+    actualValue = null;
+    euclideanDistance = normalizer.getEuclideanDistance(expectedValue, actualValue);
+
+    ok(euclideanDistance === null, "Passed!");
+});
+
+test("Array parameters should contain numbers only", function() {
+    var normalizer = new Normalizer(),
+        expectedValue = [0, 0, 0, 0, 0, 0, 0],
+        actualValue = [{}, [], {}],
+        euclideanDistance = normalizer.getEuclideanDistance(expectedValue, actualValue);
+
+    ok(euclideanDistance === null, "Passed!");
+
+    expectedValue = [{}, [], {}];
+    actualValue = [0, 0, 0, 0, 0, 0, 0];
+    euclideanDistance = normalizer.getEuclideanDistance(expectedValue, actualValue);
+
+    ok(euclideanDistance === null, "Passed!");
+
+    expectedValue = [{}, [], {}, '1', 0];
+    actualValue = [0, {}, [], '1', []];
+    euclideanDistance = normalizer.getEuclideanDistance(expectedValue, actualValue);
+
+    ok(euclideanDistance === null, "Passed!");
+});
+
+module("Get shortest Euclidean Distance between sets");
+
+test("Passing an array of Equilaterally encoded values returns shortest distance", function() {
+    var normalizer = new Normalizer(),
+        distanceValues = [0.389, 2.478, 1.988, 0.001, 0.99, 1.113, 3.141],
+        shortestDistance = normalizer.getShortestDistance(distanceValues);
+
+    ok(typeof shortestDistance === 'number', "Passed!");
+    ok(shortestDistance === 0.001, "Passed!");
+});
+
+test("Not passing in any parameters will return null", function() {
+    var normalizer = new Normalizer(),
+        shortestDistance = normalizer.getShortestDistance();
+
+    ok(shortestDistance === null, "Passed!");
+});
+
+test("Non-array values passed in as a parameter will return null", function() {
+    var normalizer = new Normalizer(),
+        distanceValues = "test",
+        shortestDistance = normalizer.getShortestDistance(distanceValues);
+
+    ok(shortestDistance === null, "Passed!");
+
+    distanceValues = {};
+    shortestDistance = normalizer.getShortestDistance(distanceValues);
+
+    ok(shortestDistance === null, "Passed!");
+
+    distanceValues = 42;
+    shortestDistance = normalizer.getShortestDistance(distanceValues);
+
+    ok(shortestDistance === null, "Passed!");
+
+    distanceValues = null;
+    shortestDistance = normalizer.getShortestDistance(distanceValues);
+
+    ok(shortestDistance === null, "Passed!");
 });
