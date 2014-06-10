@@ -9,16 +9,8 @@ function Normalizer(dataHigh, dataLow, normalizedHigh, normalizedLow, classEncod
 Normalizer.prototype = {
     normalize: function(numberToNormalize) {
 
-        if(numberToNormalize === undefined || numberToNormalize === null) {
+        if(!this.validateForNumeric(numberToNormalize)) {
             return null;
-        }
-
-        if(typeof numberToNormalize === 'object') {
-            return null;
-        }
-
-        if(typeof numberToNormalize === 'string') {
-            numberToNormalize = parseFloat(numberToNormalize);
         }
 
         var numberToNormalizeAfterSubtraction = numberToNormalize - this.dataLow,
@@ -31,15 +23,7 @@ Normalizer.prototype = {
 
     denormalize: function(numberToDenormalize) {
 
-        if(numberToDenormalize === undefined || numberToDenormalize === null) {
-            return null;
-        }
-
-        if(typeof numberToDenormalize === 'string') {
-            numberToDenormalize = parseFloat(numberToDenormalize);
-        }
-
-        if(typeof numberToDenormalize === 'object') {
+        if(!this.validateForNumeric(numberToDenormalize)) {
             return null;
         }
 
@@ -54,19 +38,8 @@ Normalizer.prototype = {
 
     oneOfNEncode: function(classesToNormalize) {
 
-        if(classesToNormalize === undefined || classesToNormalize === null) {
+        if(!this.validateForArray(classesToNormalize, 'string')) {
             return null;
-        }
-
-        if(typeof classesToNormalize !== 'object') {
-            return null;
-        }
-
-        for(var i = 0; i < classesToNormalize.length; i++) {
-
-            if(typeof classesToNormalize[i] !== 'string') {
-                return null;
-            }
         }
 
         var encodedClasses = {};
@@ -135,43 +108,8 @@ Normalizer.prototype = {
 
     getEuclideanDistance: function(expectedValue, actualValue) {
 
-        if(expectedValue === undefined || expectedValue === null) {
-            return null;
-        }
-
-        if(actualValue === undefined || actualValue === null) {
-            return null;
-        }
-
-        //Check if expectedValue a non-array object
-        if(typeof expectedValue === 'object' && !expectedValue.hasOwnProperty('length')) {
-           return null;
-        }
-
-        if(typeof expectedValue === 'string' || typeof expectedValue === 'number') {
-            return null;
-        }
-
-        //Check if expectedValue a non-array object
-        if(typeof actualValue === 'object' && !actualValue.hasOwnProperty('length')) {
-            return null;
-        }
-
-        if(typeof actualValue === 'string' || typeof actualValue === 'number') {
-            return null;
-        }
-
-        for(var i = 0; i < expectedValue.length; i++) {
-
-            if(typeof expectedValue[i] !== 'number') {
-                return null;
-            }
-        }
-
-        for(var i = 0; i < actualValue.length; i++) {
-            if(typeof actualValue[i] !== 'number') {
-                return null;
-            }
+        if(!this.validateForArray(expectedValue, 'number') || !this.validateForArray(actualValue, 'number')) {
+            return -1;
         }
 
         var results = 0;
@@ -186,16 +124,8 @@ Normalizer.prototype = {
 
     getShortestDistance: function(distanceValues) {
 
-        if(distanceValues === undefined || distanceValues === null) {
-            return null;
-        }
-
-        if(typeof distanceValues === 'string' || typeof distanceValues === 'number') {
-            return null;
-        }
-
-        if(typeof distanceValues === 'object' && !distanceValues.hasOwnProperty('length')) {
-            return null;
+        if(!this.validateForArray(distanceValues)) {
+            return -1;
         }
 
         var shortestDistance = -1;
@@ -211,5 +141,32 @@ Normalizer.prototype = {
         }
 
         return shortestDistance;
+    },
+
+    validateForNumeric: function(value) {
+        if(typeof value !== 'number') {
+            return false;
+        }
+
+        return true;
+    },
+
+    validateForArray: function(value, type) {
+        var valueIsArray = value instanceof Array;
+
+        type = type || 'number';
+
+        if(!valueIsArray) {
+            return false;
+        } else {
+            for(var i = 0; i < value.length; i++) {
+
+                if(typeof value[i] !== type) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 };

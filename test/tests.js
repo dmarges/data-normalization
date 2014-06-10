@@ -1,320 +1,180 @@
-module("Creating a Normalization Object");
+module("Creating a Normalization Object", {
+    setup: function() {
+        normalizer = new Normalizer();
+    },
 
-test( "Normalization object created successfully", function() {
-    var normalizer = new Normalizer();
-    ok( typeof normalizer === "object", "Passed!" );
+    teardown: function() {
+        normalizer = null;
+    }
 });
 
-test("Setting instance variables", function() {
-    var normalizer = new Normalizer(10, 0, 1, -1, -1);
-    ok(normalizer.dataHigh === 10, "Passed!");
-    ok(normalizer.dataLow === 0, "Passed!");
-    ok(normalizer.normalizedHigh === 1, "Passed!");
-    ok(normalizer.normalizedLow === -1, "Passed!");
-    ok(normalizer.classEncodingValue === -1, "Passed!");
+    test( "Normalization object created successfully", function() {
+        ok( typeof normalizer === "object", "New instance of Normalization object was not created" );
+    });
+
+    test("Setting instance variables", function() {
+        ok(typeof normalizer.dataHigh === 'number', "Data max value not set");
+        ok(typeof normalizer.dataLow === 'number', "Data min value not set");
+        ok(typeof normalizer.normalizedHigh === 'number', "Normalized max value not set");
+        ok(typeof normalizer.normalizedLow === 'number', "Normalized min value not set");
+        ok(typeof normalizer.classEncodingValue === 'number', "Class Encoding Value not set");
+    });
+
+module();
+
+module("Normalizing data", {
+    setup: function() {
+        normalizer = new Normalizer();
+    },
+
+    teardown: function() {
+        normalizer = null;
+    }
 });
 
-test("Setting instance variables with no input parameters", function() {
-    var normalizer = new Normalizer();
-    ok(normalizer.dataHigh === 10, "Passed!");
-    ok(normalizer.dataLow === 0, "Passed!");
-    ok(normalizer.normalizedHigh === 1, "Passed!");
-    ok(normalizer.normalizedLow === -1, "Passed!");
-    ok(normalizer.classEncodingValue === 0, "Passed!");
+    test("Normalizing with default data", function() {
+        ok(normalizer.normalize(7) === 0.40, "Calculating normalized number was incorrect!");
+    });
+
+module();
+
+module("Denormalizing Data", {
+    setup: function() {
+        normalizer = new Normalizer();
+    },
+
+    teardown: function() {
+        normalizer = null;
+    }
 });
 
-module("Normalizing data");
+    test("Denormalizing with default data", function() {
+        ok(normalizer.denormalize(0.4) === 7, "Denormalize method did not calculate correct value");
+    });
 
-test("Normalizing with default data", function() {
-    var normalizer = new Normalizer(),
-        sampleNormalizedNumber = normalizer.normalize(7);
+module();
 
-    ok(sampleNormalizedNumber === 0.40, "Passed!");
+module("One-of-N Encoding", {
+    setup: function() {
+        normalizer = new Normalizer();
+    },
+
+    teardown: function() {
+        normalizer = null;
+    }
 });
 
-test("Normalizing with input parameters passed into Normalizer object", function() {
-    var normalizer = new Normalizer(10, 1, 1, 0),
-        sampleNormalizedNumber = normalizer.normalize(7);
+    test("Passing in an array of class names should return an array of numeric values", function() {
+        var sampleClasses = ['Red', 'Green', 'Blue'],
+            normalizedClasses = normalizer.oneOfNEncode(sampleClasses);
 
-    ok(sampleNormalizedNumber === 0.333, "Passed!");
+        ok(typeof normalizedClasses === 'object', "oneOfNEncode did not return an object");
+
+        ok(normalizedClasses.hasOwnProperty('Red') === true, "oneOfNEncode did not create property on object");
+        ok(normalizedClasses.hasOwnProperty('Green') === true, "oneOfNEncode did not create property on object");
+        ok(normalizedClasses.hasOwnProperty('Blue') === true, "oneOfNEncode did not create property on object");
+
+        for(var i = 0; i < sampleClasses.length; i++) {
+            ok(normalizer.validateForArray(normalizedClasses[sampleClasses[i]]), "oneOfNEncode did not properly encode arrays");
+        }
+    });
+
+module();
+
+module("Equilateral Encoding", {
+    setup: function() {
+        normalizer = new Normalizer();
+    },
+
+    teardown: function() {
+        normalizer = null;
+    }
 });
 
-test("Trying to normalize with no input number", function() {
-    var normalizer = new Normalizer(),
-        sampleNormalizedNumber = normalizer.normalize();
+    test("Passing in array of class names should return an object with encoded classes", function() {
+        var sampleClasses = ["Red", "Green", "Blue"],
+            normalizedClasses = normalizer.equilateralEncode(sampleClasses, sampleClasses.length);
 
-    ok(sampleNormalizedNumber === null, "Passed!");
+        ok(typeof normalizedClasses === 'object', "equilateralEncode did not create valid object");
+
+        ok(normalizedClasses.hasOwnProperty("Red") === true, "equilateralEncode object did not have correct property");
+        ok(normalizedClasses.hasOwnProperty("Green") === true,  "equilateralEncode object did not have correct property");
+        ok(normalizedClasses.hasOwnProperty("Blue") === true,  "equilateralEncode object did not have correct property");
+    });
+
+module();
+
+module("Euclidean Distance", {
+    setup: function() {
+        normalizer = new Normalizer();
+    },
+
+    teardown: function() {
+        normalizer = null;
+    }
 });
 
-test("Normalizing number passed in as string", function() {
-    var normalizer = new Normalizer(),
-        sampleNormalizedNumber = normalizer.normalize("7");
+    test("Passing in expected values as an array and an actual values as as an array will return the distance", function() {
+        normalizer = new Normalizer(1, 0, 1, 0);
 
-    ok(sampleNormalizedNumber === 0.40, "Passed!");
+        var expectedValue = [1, 0, 0, 0, 0, 0, 0],
+            actualValue = [0, 0, 0, 1, 0, 1, 0],
+            euclideanDistance = normalizer.getEuclideanDistance(expectedValue, actualValue);
+
+        ok(euclideanDistance > 0, "euclideanDistance return valid number");
+    });
+
+module();
+
+module("Get shortest Euclidean Distance between sets", {
+    setup: function() {
+        normalizer = new Normalizer();
+    },
+
+    teardown: function() {
+        normalizer = null;
+    }
 });
 
-test("Trying to normalize with object passed in", function() {
-    var normalizer = new Normalizer(),
-        sampleNormalizedNumber = normalizer.normalize({"number": 7});
+    test("Passing an array of Equilaterally encoded values returns shortest distance", function() {
+        ok(normalizer.getShortestDistance([0.389, 2.478, 1.988, 0.001, 0.99, 1.113, 3.141]) === 0.001,
+            "getShortestDistance did not calculate correct value");
+    });
 
-    ok(sampleNormalizedNumber === null, "Passed!");
+module();
+
+module("Validation Functions", {
+    setup: function() {
+        normalizer = new Normalizer();
+    },
+
+    teardown: function() {
+        normalizer = null;
+    }
 });
 
-test("Trying to normalize with null passed in", function() {
-    var normalizer = new Normalizer(),
-        sampleNormalizedNumber = normalizer.normalize(null);
-
-    ok(sampleNormalizedNumber === null, "Passed!");
-});
-
-module("Denormalizing Data");
-
-test("Denormalizing with default data", function() {
-    var normalizer = new Normalizer(),
-        sampleNumberToDenormalize = 0.4,
-        denormalizedNumber = normalizer.denormalize(sampleNumberToDenormalize);
-
-    ok(denormalizedNumber === 7, "Passed!");
-});
-
-test("Denormalizing number with input parameters passed into Normalizer object", function() {
-    var normalizer = new Normalizer(10, 1, 1, 0),
-        sampleNumberToDenormalize = 0.333,
-        denormalizedNumber = normalizer.denormalize(sampleNumberToDenormalize);
-
-    ok(denormalizedNumber === 7, "Passed!");
-});
-
-test("Tyring to denormalize with no input number", function() {
-   var normalizer = new Normalizer(),
-       denormalizedNumber = normalizer.denormalize();
-
-    ok(denormalizedNumber === null, "Passed!");
-});
-
-test("Denormalizing number passed in as string", function() {
-    var normalizer = new Normalizer(),
-        sampleDenormalizedNumber = normalizer.denormalize("0.40");
-
-    ok(sampleDenormalizedNumber === 7, "Passed!");
-});
-
-test("Trying to denormalize number with object passed in", function() {
-    var normalizer = new Normalizer(),
-        sampleDenormalizedNumber = normalizer.denormalize({number: 7});
-
-    ok(sampleDenormalizedNumber === null, "Passed!");
-});
-
-test("Trying to denormalize number with null passed in", function() {
-    var normalizer = new Normalizer(),
-        sampleDenormalizedNumber = normalizer.denormalize({number: 7});
-
-    ok(sampleDenormalizedNumber === null, "Passed!");
-});
-
-module("One-of-N Encoding");
-
-test("Passing in an array of class names should return an array of numeric values", function() {
-    var normalizer = new Normalizer(),
-        sampleClasses = ['Red', 'Green', 'Blue'],
-        normalizedClasses = normalizer.oneOfNEncode(sampleClasses);
-
-    ok(typeof normalizedClasses === 'object', "Passed!");
-
-    ok(normalizedClasses.hasOwnProperty('Red') === true, "Passed!");
-    ok(normalizedClasses.hasOwnProperty('Green') === true, "Passed!");
-    ok(normalizedClasses.hasOwnProperty('Blue') === true, "Passed!");
-
-    ok(normalizedClasses[sampleClasses[0]][0] === 1, "Passed!");
-    ok(normalizedClasses[sampleClasses[0]][1] === 0, "Passed!");
-    ok(normalizedClasses[sampleClasses[0]][2] === 0, "Passed!");
-
-    ok(normalizedClasses[sampleClasses[1]][0] === 0, "Passed!");
-    ok(normalizedClasses[sampleClasses[1]][1] === 1, "Passed!");
-    ok(normalizedClasses[sampleClasses[1]][2] === 0, "Passed!");
-
-    ok(normalizedClasses[sampleClasses[2]][0] === 0, "Passed!");
-    ok(normalizedClasses[sampleClasses[2]][1] === 0, "Passed!");
-    ok(normalizedClasses[sampleClasses[2]][2] === 1, "Passed!");
-});
-
-test("Passing in nothing should return null", function() {
-    var normalizer = new Normalizer(),
-        normalizedClasses = normalizer.oneOfNEncode();
-
-    ok(normalizedClasses === null, "Passed!");
-});
-
-test("Passing in anything else other than an array (object type in JS) should return null", function() {
-    var normalizer = new Normalizer(),
-        normalizedClasses = normalizer.oneOfNEncode('hello');
-
-    ok(normalizedClasses === null, "Passed!");
-
-    normalizedClasses = normalizer.oneOfNEncode(10);
-
-    ok(normalizedClasses === null, "Passed!");
-
-    normalizedClasses = normalizer.oneOfNEncode(null);
-
-    ok(normalizedClasses === null, "Passed!");
-});
-
-test("Passing in array of numbers should return null", function() {
-    var normalizer = new Normalizer(),
-        sampleClasses = [0, 0, 0];
-        normalizedClasses = normalizer.oneOfNEncode(sampleClasses);
-
-    ok(normalizedClasses === null, "Passed!");
-});
-
-module("Equilateral Encoding");
-
-test("Passing in array of class names should return an object with encoded classes", function() {
-    var normalizer = new Normalizer(),
-        sampleClasses = ["Red", "Green", "Blue"],
-        normalizedClasses = normalizer.equilateralEncode(sampleClasses, sampleClasses.length);
-
-    ok(typeof normalizedClasses === 'object', "Passed!");
-
-    ok(normalizedClasses.hasOwnProperty("Red") === true, "Passed!");
-    ok(normalizedClasses.hasOwnProperty("Green") === true, "Passed!");
-    ok(normalizedClasses.hasOwnProperty("Blue") === true, "Passed!");
-});
-
-module("Euclidean Distance");
-
-test("Passing in expected values as an array and an actual values as as an array will return the distance", function() {
-    var normalizer = new Normalizer(1, 0, 1, 0),
-        expectedValue = [1, 0, 0, 0, 0, 0, 0],
-        actualValue = [0, 0, 0, 1, 0, 1, 0],
-        euclideanDistance = normalizer.getEuclideanDistance(expectedValue, actualValue);
-
-    ok(typeof euclideanDistance === 'number', "Passed!");
-});
-
-test("Not passing in any arguments should return null", function() {
-    var normalizer = new Normalizer(),
-        euclideanDistance = normalizer.getEuclideanDistance();
-
-    ok(euclideanDistance === null, "Passed!");
-});
-
-test("Passing wrong number of arguments should return null", function() {
-    var normalizer = new Normalizer(),
-        actualValue = [0, 0, 0, 0, 0, 0, 0],
-        euclideanDistance = normalizer.getEuclideanDistance(actualValue);
-
-    ok(euclideanDistance === null, "Passed!");
-});
-
-test("Passing in non array values to first argument should return null", function() {
-    var normalizer = new Normalizer(),
-        expectedValue = {},
-        actualValue = [0, 0, 0, 0, 0, 0, 0],
-        euclideanDistance = normalizer.getEuclideanDistance(expectedValue, actualValue);
-
-    ok(euclideanDistance === null, "Passed!");
-
-    expectedValue = "test";
-    euclideanDistance = normalizer.getEuclideanDistance(expectedValue, actualValue);
-
-    ok(euclideanDistance === null, "Passed!");
-
-    expectedValue = 42;
-    euclideanDistance = normalizer.getEuclideanDistance(expectedValue, actualValue);
-
-    ok(euclideanDistance === null, "Passed!");
-
-    expectedValue = null;
-    euclideanDistance = normalizer.getEuclideanDistance(expectedValue, actualValue);
-
-    ok(euclideanDistance === null, "Passed!");
-});
-
-test("Passing in non array values to second argument should return null", function() {
-    var normalizer = new Normalizer(),
-        expectedValue = [0, 0, 0, 0, 0, 0, 0],
-        actualValue = {},
-        euclideanDistance = normalizer.getEuclideanDistance(expectedValue, actualValue);
-
-    ok(euclideanDistance === null, "Passed!");
-
-    actualValue = "test";
-    euclideanDistance = normalizer.getEuclideanDistance(expectedValue, actualValue);
-
-    ok(euclideanDistance === null, "Passed!");
-
-    actualValue = 42;
-    euclideanDistance = normalizer.getEuclideanDistance(expectedValue, actualValue);
-
-    ok(euclideanDistance === null, "Passed!");
-
-    actualValue = null;
-    euclideanDistance = normalizer.getEuclideanDistance(expectedValue, actualValue);
-
-    ok(euclideanDistance === null, "Passed!");
-});
-
-test("Array parameters should contain numbers only", function() {
-    var normalizer = new Normalizer(),
-        expectedValue = [0, 0, 0, 0, 0, 0, 0],
-        actualValue = [{}, [], {}],
-        euclideanDistance = normalizer.getEuclideanDistance(expectedValue, actualValue);
-
-    ok(euclideanDistance === null, "Passed!");
-
-    expectedValue = [{}, [], {}];
-    actualValue = [0, 0, 0, 0, 0, 0, 0];
-    euclideanDistance = normalizer.getEuclideanDistance(expectedValue, actualValue);
-
-    ok(euclideanDistance === null, "Passed!");
-
-    expectedValue = [{}, [], {}, '1', 0];
-    actualValue = [0, {}, [], '1', []];
-    euclideanDistance = normalizer.getEuclideanDistance(expectedValue, actualValue);
-
-    ok(euclideanDistance === null, "Passed!");
-});
-
-module("Get shortest Euclidean Distance between sets");
-
-test("Passing an array of Equilaterally encoded values returns shortest distance", function() {
-    var normalizer = new Normalizer(),
-        distanceValues = [0.389, 2.478, 1.988, 0.001, 0.99, 1.113, 3.141],
-        shortestDistance = normalizer.getShortestDistance(distanceValues);
-
-    ok(typeof shortestDistance === 'number', "Passed!");
-    ok(shortestDistance === 0.001, "Passed!");
-});
-
-test("Not passing in any parameters will return null", function() {
-    var normalizer = new Normalizer(),
-        shortestDistance = normalizer.getShortestDistance();
-
-    ok(shortestDistance === null, "Passed!");
-});
-
-test("Non-array values passed in as a parameter will return null", function() {
-    var normalizer = new Normalizer(),
-        distanceValues = "test",
-        shortestDistance = normalizer.getShortestDistance(distanceValues);
-
-    ok(shortestDistance === null, "Passed!");
-
-    distanceValues = {};
-    shortestDistance = normalizer.getShortestDistance(distanceValues);
-
-    ok(shortestDistance === null, "Passed!");
-
-    distanceValues = 42;
-    shortestDistance = normalizer.getShortestDistance(distanceValues);
-
-    ok(shortestDistance === null, "Passed!");
-
-    distanceValues = null;
-    shortestDistance = normalizer.getShortestDistance(distanceValues);
-
-    ok(shortestDistance === null, "Passed!");
-});
+    test("Validating number input catches number input as valid", function() {
+        ok(normalizer.validateForNumeric(7), "Passed!");
+    });
+
+    test("Validating number input catches non numeric values as invalid", function() {
+        ok(!normalizer.validateForNumeric("7"), "Passed!");
+        ok(!normalizer.validateForNumeric({number: 7}), "Passed!");
+        ok(!normalizer.validateForNumeric([7]), "Passed!");
+        ok(!normalizer.validateForNumeric(), "Passed!");
+        ok(!normalizer.validateForNumeric(null), "Passed!");
+    });
+
+    test("Validating array input catches array input as valid", function() {
+        ok(normalizer.validateForArray([42], 'number'), "Passed!");
+    });
+
+    test("Validating array input catches non array input as invalid", function() {
+        ok(!normalizer.validateForArray("42", 'number'), "Passed!");
+        ok(!normalizer.validateForArray(42, 'number'), "Passed!");
+        ok(!normalizer.validateForArray({number: 42}, 'number'), "Passed!");
+        ok(!normalizer.validateForArray(), "Passed!");
+        ok(!normalizer.validateForArray(null, 'number'), "Passed!");
+    });
+
+module();
